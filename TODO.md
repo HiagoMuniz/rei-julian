@@ -2,21 +2,21 @@
 
 > **Note for Agent:** Before starting any task in a new session, ALWAYS ask the user for confirmation and direction.
 
-## 🟢 Completed Today (April 22, 2026)
-- [x] Implemented multi-tracker support (tracking multiple individuals simultaneously).
-- [x] Added "Mort" as a second simulated individual alongside "Julian".
-- [x] Updated Frontend to handle multiple markers via ID-based dictionary.
-- [x] Added permanent name tooltips above markers on the map for easy identification.
-- [x] Restructured API to support `/positions` (all) and SSE stream with IDs.
+## 🟢 Completed Today (May 20, 2026)
+- [x] Refactored backend into modular packages (`internal/geo`, `internal/tracker`, etc.).
+- [x] Integrated SQLite persistence for tracking history.
+- [x] Automated database initialization from `schema.sql`.
+- [x] Simulation now registers drivers and saves every movement to the database.
 
-## 🟡 Next Session Start
-- [ ] **Task 1: Database Initialization**
-  - Create the `reijulian.db` file using the `scripts/schema.sql`.
-- [ ] **Task 2: Backend Refactor**
-  - Move Simulation math from `main.go` to `internal/simulation/`.
-  - Move Tracker logic from `main.go` to `internal/tracker/`.
-- [ ] **Task 3: Persistence implementation**
-  - Implement SQLite logic to save `position_history` for each individual moving.
+## 🟡 Next Session Start (Awaiting Approval)
+- [ ] **Task 1: API Enhancement**
+  - Create `GET /api/drivers` to list all registered drivers from DB.
+  - Create `GET /api/history/{id}` to fetch historical path for a specific driver.
+- [ ] **Task 2: Driver Ingestion API**
+  - Create `POST /api/location` to allow real manual updates (preparing for mobile app).
+- [ ] **Task 3: Frontend Polishing**
+  - Add a sidebar to the map showing the list of drivers and their status.
+  - Add a "History Mode" to draw the path taken by a driver on the map.
 
 ---
-*Last update: April 22, 2026*
+*Last update: May 20, 2026*

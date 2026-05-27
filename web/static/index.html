@@ -1,99 +1,63 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Rei Julian - Rastreamento</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
-
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rei Julian - Sistema Logístico</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body { background: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh;}
+        .portal-container {
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+            text-align: center;
+        }
+        .portal-container h1 { color: var(--primary); font-size: 2.5rem; margin-bottom: 10px;}
+        .portal-container > p { color: #64748b; margin-bottom: 40px; font-size: 1.1rem;}
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        .portal-card {
+            background: white;
+            padding: 40px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
+        }
+        .portal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+        }
+        .portal-card h2 { margin: 0 0 10px 0; color: var(--primary); font-size: 1.4rem;}
+        .portal-card p { margin: 0; color: #64748b; font-size: 0.95rem; }
+    </style>
 </head>
 <body>
-
-<div id="map"></div>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-  // Coordenada inicial (Praça Coronel Pedro Osório)
-  const initialLat = -31.770687426923516;
-  const initialLng = -52.34135057529372;
-
-  // Cria mapa
-  const map = L.map('map').setView([initialLat, initialLng], 17);
-
-  // Camada base (OpenStreetMap)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
-  }).addTo(map);
-
-  // Dicionário para armazenar múltiplos marcadores
-  const markers = {};
-
-  // Função para obter cor baseada no ID
-  function getMarkerColor(id) {
-    if (id === 'julian') return 'blue';
-    if (id === 'mort') return 'red';
-    return 'green';
-  }
-
-  // Conexão SSE com backend
-  const source = new EventSource("/stream");
-
-  source.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-
-    const id = data.id;
-    const lat = data.latitude;
-    const lng = data.longitude;
-
-    if (!markers[id]) {
-      // Cria novo marcador se não existir
-      markers[id] = L.marker([lat, lng], {
-        title: id
-      }).addTo(map);
-      
-      // Adiciona um Tooltip permanente acima do pin
-      markers[id].bindTooltip(id, {
-        permanent: true,
-        direction: 'top',
-        className: 'marker-label'
-      }).openTooltip();
-
-      markers[id].bindPopup(`Indivíduo: ${id}`);
-    } else {
-      // Move marcador existente
-      markers[id].setLatLng([lat, lng]);
-    }
-
-    // Opcional: Centraliza o mapa no primeiro que se mover (ou remove se quiser livre)
-    // map.panTo([lat, lng]);
-
-    console.log("Atualizado:", id, lat, lng);
-  };
-
-  source.onerror = function(err) {
-    console.error("Erro SSE:", err);
-  };
-</script>
-
+    <div class="portal-container">
+        <h1>Rei Julian</h1>
+        <p>Sistema Integrado de Rastreamento Logístico</p>
+        
+        <div class="portal-grid">
+            <a href="/admin" class="portal-card">
+                <h2>Restaurante</h2>
+                <p>Painel de controle e monitoramento da frota</p>
+            </a>
+            <a href="/driver" class="portal-card">
+                <h2>Entregador</h2>
+                <p>Interface móvel de atualização de rota</p>
+            </a>
+            <a href="/client" class="portal-card">
+                <h2>Cliente</h2>
+                <p>Acompanhamento de pedido em tempo real</p>
+            </a>
+        </div>
+    </div>
 </body>
 </html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rei Julian - Área do Entregador</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body { background: #f8fafc; }
+        .driver-container {
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .status-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border-top: 4px solid var(--success);
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .order-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .order-card h3 { margin-top: 0; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;}
+        .order-info p { margin: 8px 0; color: #475569; font-size: 0.95rem; }
+        .btn-finish { background: var(--accent); width: 100%; margin-top: 15px; padding: 12px;}
+    </style>
+</head>
+<body>
+    <div class="driver-container">
+        <div class="header">
+            <h2 style="margin: 0; color: var(--primary);">Entregador</h2>
+            <a href="/" style="color: #64748b; text-decoration: none; font-size: 0.9rem;">Sair</a>
+        </div>
+
+        <div class="status-card">
+            <h3 style="margin: 0 0 10px 0; color: var(--text);"><span class="status-indicator"></span> Transmitindo Localização</h3>
+            <p style="margin: 0; color: #64748b; font-size: 0.9rem;">Seu GPS está ativo e conectado com o restaurante.</p>
+        </div>
+        
+        <div class="order-card">
+            <h3>Pedido Atual: #1042</h3>
+            <div class="order-info">
+                <p><strong>Cliente:</strong> Hiago Muniz</p>
+                <p><strong>Endereço:</strong> Praça Coronel Pedro Osório, 10</p>
+                <p><strong>Status:</strong> Em rota</p>
+            </div>
+            <button class="btn btn-finish">Sinalizar Entrega Concluída</button>
+        </div>
+    </div>
+</body>
+</html>

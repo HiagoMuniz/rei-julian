@@ -6,13 +6,18 @@ import (
 
 const (
 	EarthRadiusMeters = 6371000.0
+	StepMeters        = 10.0
+
+	// Pelotas - Praça Coronel Pedro Osório
+	DefaultStartLat = -31.770687426923516
+	DefaultStartLon = -52.34135057529372
 )
 
 // MovePoint desloca um ponto geográfico por certa distância em uma direção dada.
 // Fórmula de navegação sobre esfera.
 func MovePoint(latDeg, lonDeg, distanceMeters, bearingRad float64) (float64, float64) {
-	lat1 := degreesToRadians(latDeg)
-	lon1 := degreesToRadians(lonDeg)
+	lat1 := DegreesToRadians(latDeg)
+	lon1 := DegreesToRadians(lonDeg)
 	angularDistance := distanceMeters / EarthRadiusMeters
 
 	lat2 := math.Asin(
@@ -25,14 +30,14 @@ func MovePoint(latDeg, lonDeg, distanceMeters, bearingRad float64) (float64, flo
 		math.Cos(angularDistance)-math.Sin(lat1)*math.Sin(lat2),
 	)
 
-	return radiansToDegrees(lat2), NormalizeLongitude(radiansToDegrees(lon2))
+	return RadiansToDegrees(lat2), NormalizeLongitude(RadiansToDegrees(lon2))
 }
 
-func degreesToRadians(d float64) float64 {
+func DegreesToRadians(d float64) float64 {
 	return d * math.Pi / 180.0
 }
 
-func radiansToDegrees(r float64) float64 {
+func RadiansToDegrees(r float64) float64 {
 	return r * 180.0 / math.Pi
 }
 

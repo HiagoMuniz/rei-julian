@@ -1,0 +1,54 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+\geometry{margin=2.5cm}
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{}[\titlerule]
+
+\title{Especificação de Caso de Estudo: Projeto Rei Julian \\ \large Rastreamento Geográfico para Delivery Local}
+\author{Hiago Dona Muniz \\ \small Disciplina de TEC IV - Ciência da Computação (UFPel)}
+\date{22 de Abril de 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Introdução}
+O projeto \textbf{Rei Julian} é um sistema de monitoramento em tempo real focado na logística de entregas. O objetivo é conectar o restaurante, o motoboy e o cliente final em uma única plataforma onde a localização do pedido é compartilhada de forma automática e transparente.
+
+\section{Importância e Impacto Prático}
+A implementação desta ferramenta foca em resolver gargalos operacionais comuns no delivery:
+\begin{itemize}
+    \item \textbf{Eficiência no Atendimento:} Ao disponibilizar o rastreio para o cliente, o restaurante reduz drasticamente o número de chamadas telefônicas para perguntar o status da entrega.
+    \item \textbf{Gestão da Frota:} O administrador tem uma visão clara da posição de cada entregador, permitindo identificar atrasos, motoboys parados ou necessidade de redistribuição de pedidos.
+    \item \textbf{Experiência do Usuário:} A visibilidade do trajeto gera confiança no serviço e reduz a ansiedade do cliente durante o tempo de espera.
+    \item \textbf{Independência Tecnológica:} Permite que estabelecimentos locais gerenciem sua própria logística sem depender exclusivamente de plataformas de terceiros e suas taxas.
+\end{itemize}
+
+\section{Atores do Sistema}
+\begin{description}
+    \item[Restaurante:] Interface administrativa para monitorar todos os entregadores ativos, gerenciar o status da frota e consultar o histórico de rotas para auditoria.
+    \item[Motoboy:] Aplicativo/Interface que utiliza o GPS do smartphone para transmitir as coordenadas para o servidor e atualizar o status do pedido (Coletado, Em Rota, Entregue).
+    \item[Cliente:] Link temporário de visualização onde o cliente acompanha apenas o entregador vinculado ao seu pedido específico.
+\end{description}
+
+\section{Viabilidade Técnica}
+O projeto é tecnicamente viável e de baixo custo devido às escolhas arquiteturais:
+\begin{itemize}
+    \item \textbf{Linguagem Go:} Alta performance para lidar com múltiplas conexões simultâneas consumindo poucos recursos de servidor.
+    \item \textbf{Protocolo SSE (Server-Sent Events):} Método leve para enviar atualizações de posição do servidor para o mapa, economizando bateria nos dispositivos móveis.
+    \item \textbf{Persistência com SQLite:} Banco de dados eficiente que dispensa infraestruturas complexas para o armazenamento do histórico de movimentação.
+    \item \textbf{Ferramentas Open Source:} Uso de Leaflet e OpenStreetMap, eliminando custos com licenciamento de mapas.
+\end{itemize}
+
+\section{Fluxo de Funcionamento}
+1. O restaurante atribui uma entrega a um motoboy. 2. O sistema gera um ID de rastreio único. 3. O motoboy inicia a rota e o sistema passa a transmitir suas coordenadas. 4. O cliente visualiza o deslocamento em tempo real. 5. Ao confirmar a entrega no destino, o rastreio é encerrado e os dados são salvos para consultas futuras.
+
+\section{Conclusão}
+O Rei Julian demonstra ser uma solução prática e de fácil implementação. Sua importância está na melhoria direta da comunicação e no controle operacional do delivery, enquanto sua viabilidade é garantida pelo uso de tecnologias modernas, leves e gratuitas.
+
+\end{document}

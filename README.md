@@ -14,10 +14,11 @@ A ideia é validar uma infraestrutura capaz de suportar um sistema de delivery r
 - **Mapas:** OpenStreetMap.
 
 ## 📍 Funcionalidades Atuais
-- [x] **Multi-Rastreio Simulado:** O backend gera movimentações aleatórias para múltiplos agentes simultaneamente.
-- [x] **Streaming em Tempo Real:** O mapa atualiza os pins assim que o servidor envia uma nova coordenada.
-- [x] **Identificação Visual:** Labels permanentes no mapa facilitam saber quem é quem (Julian vs Mort).
-- [x] **Arquitetura Reativa:** O frontend reage a eventos sem necessidade de dar refresh ou fazer polling manual.
+- [x] **Multi-Rastreio Simulado:** Frota de entregadores (Julian, Mort, Maurice, Clover) com movimentação autônoma.
+- [x] **Dashboard Profissional:** Interface moderna com sidebar, cards de status e mapa interativo.
+- [x] **Persistência em Banco de Dados:** Histórico de rotas salvo em SQLite em tempo real.
+- [x] **Visualização de Histórico:** Rastro (trail) visual no mapa para cada entregador.
+- [x] **Streaming SSE:** Atualizações instantâneas sem refresh.
 
 ## 🏃 Como rodar
 1. Tenha o **Go** instalado na sua máquina.

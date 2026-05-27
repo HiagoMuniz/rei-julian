@@ -16,3 +16,11 @@
 
 # Project specific
 rei-julian.exe
+relatorio_multi_rastreio.tex
+*.aux
+*.log
+*.out
+*.toc
+*.pdf
+reijulian.db
+
