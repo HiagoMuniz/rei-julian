@@ -6,27 +6,263 @@
     <title>Rei Julian - Painel do Restaurante</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* ── Tooltip de instrução sobre o mapa ─────────────────────── */
+        #map-hint {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            background: rgba(17, 24, 39, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(129, 140, 248, 0.35);
+            color: #cbd5e1;
+            font-size: 0.82rem;
+            padding: 10px 20px;
+            border-radius: 999px;
+            pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            transition: opacity 0.4s;
+        }
+        #map-hint.hidden { opacity: 0; }
+        #map-hint .key {
+            display: inline-block;
+            background: rgba(129,140,248,0.2);
+            border: 1px solid rgba(129,140,248,0.4);
+            color: #818cf8;
+            padding: 1px 7px;
+            border-radius: 5px;
+            font-weight: 700;
+            font-size: 0.78rem;
+        }
+
+        /* ── Painel de despacho ─────────────────────────────────────── */
+        .dispatch-panel {
+            padding: 20px 25px;
+            background: rgba(0,0,0,0.25);
+            border-top: 1px solid var(--panel-border);
+        }
+        .dispatch-panel-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin: 0 0 14px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dispatch-panel-title::before {
+            content: '';
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 6px var(--primary);
+            flex-shrink: 0;
+        }
+        .dispatch-row {
+            display: flex;
+            gap: 8px;
+        }
+        .dispatch-row input {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--panel-border);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .dispatch-row select {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--panel-border);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .dispatch-row select option {
+            background: var(--bg-dark);
+            color: white;
+        }
+        .dispatch-row select:focus, .dispatch-row input:focus {
+            border-color: var(--primary);
+            background: rgba(129,140,248,0.07);
+        }
+        .dispatch-row input::placeholder { color: #4b5563; }
+        .dispatch-row input.ready, .dispatch-row select.ready {
+            border-color: rgba(16, 185, 129, 0.5);
+            background: rgba(16,185,129,0.06);
+        }
+        .dispatch-hint {
+            margin-top: 10px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.5;
+        }
+        .dispatch-hint .arrow {
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        /* ── Empty state ────────────────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .empty-state p { font-size: 0.85rem; line-height: 1.6; margin: 0; }
+    </style>
 </head>
 <body>
     <div class="app-container">
         <aside class="sidebar">
             <header class="sidebar-header">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h1>Painel Restaurante</h1>
-                    <a href="/" style="color: #cbd5e1; font-size: 0.85rem; text-decoration: none;">Sair</a>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h1>🏢 Rei Julian</h1>
+                    <a href="/" style="color:#cbd5e1; font-size:0.82rem; text-decoration:none; opacity:0.7;">← Portal</a>
                 </div>
-                <p>Monitoramento de Frota</p>
+                <p>Monitoramento de Frota em Tempo Real</p>
             </header>
+
             <div class="driver-list-container">
-                <div id="driver-list"></div>
+                <!-- Estado vazio (some quando há drivers) -->
+                <div class="empty-state" id="empty-state">
+                    <div class="icon">🛵</div>
+                    <p>Nenhum motoboy em campo ainda.<br>Despache um abaixo!</p>
+                </div>
+
+                <!-- Frota Ativa -->
+                <div class="list-section-title" id="active-section-title" style="display:none">
+                    <span class="dot dot-green"></span> Frota Ativa
+                </div>
+                <div id="driver-list-active"></div>
+
+                <!-- Entregas Concluídas -->
+                <div class="list-section-title" id="done-section-title" style="display:none; margin-top:20px;">
+                    <span class="dot dot-red"></span> Entregas Concluídas
+                </div>
+                <div id="driver-list-done"></div>
             </div>
-            <footer class="controls">
-                <button class="btn" onclick="togglePaths()">Ver Rotas de Entrega</button>
-            </footer>
+
+            <!-- Painel de despacho -->
+            <div class="dispatch-panel">
+                <div class="dispatch-panel-title">Despachar Motoboy</div>
+                <div class="dispatch-row" style="flex-direction: column;">
+                    <select id="driver-select">
+                        <option value="">Selecione um motoboy...</option>
+                        <option value="NEW">+ Criar novo motoboy</option>
+                    </select>
+                    <div id="new-driver-container" style="display: none; gap: 8px;">
+                        <input type="text" id="new-driver-name" placeholder="Nome do motoboy..." autocomplete="off" style="flex: 1;">
+                        <button id="btn-create-driver" style="padding: 0 15px; border-radius: 8px; border: none; background: var(--primary); color: white; cursor: pointer; font-weight: bold;">Criar</button>
+                    </div>
+                </div>
+                <div class="dispatch-hint" id="dispatch-hint-text">
+                    Selecione um motoboy e<br>
+                    <span class="arrow">↗</span> <strong style="color:#e2e8f0">clique com botão direito</strong> no mapa para despachar
+                </div>
+            </div>
         </aside>
-        <main id="map"></main>
+
+        <main id="map">
+            <!-- Dica flutuante sobre o mapa -->
+            <div id="map-hint" class="hidden">
+                <span class="key">Clique direito</span> em qualquer ponto do mapa para despachar o motoboy selecionado
+            </div>
+        </main>
     </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="/js/app.js"></script>
+    <script>
+        const sel = document.getElementById('driver-select');
+        const newContainer = document.getElementById('new-driver-container');
+        const inp = document.getElementById('new-driver-name');
+        const btnCreate = document.getElementById('btn-create-driver');
+        const hint = document.getElementById('map-hint');
+
+        sel.addEventListener('change', () => {
+            if (sel.value === 'NEW') {
+                newContainer.style.display = 'flex';
+                inp.focus();
+                hint.classList.add('hidden');
+                sel.classList.remove('ready');
+            } else {
+                newContainer.style.display = 'none';
+                if (sel.value !== '') {
+                    sel.classList.add('ready');
+                    hint.classList.remove('hidden');
+                } else {
+                    sel.classList.remove('ready');
+                    hint.classList.add('hidden');
+                }
+            }
+        });
+
+        inp.addEventListener('input', () => {
+            if (inp.value.trim().length > 0) {
+                inp.classList.add('ready');
+            } else {
+                inp.classList.remove('ready');
+            }
+        });
+
+        btnCreate.addEventListener('click', () => {
+            const name = inp.value.trim();
+            if (!name) {
+                alert('Digite o nome do motoboy!');
+                return;
+            }
+
+            btnCreate.disabled = true;
+            btnCreate.textContent = '...';
+
+            fetch('/api/drivers/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'created') {
+                    // Adiciona na lista antes da opção NEW
+                    const opt = document.createElement('option');
+                    opt.value = data.name;
+                    opt.textContent = data.name;
+                    sel.insertBefore(opt, sel.options[sel.options.length - 1]);
+                    
+                    // Seleciona ele
+                    sel.value = data.name;
+                    newContainer.style.display = 'none';
+                    inp.value = '';
+                    sel.classList.add('ready');
+                    hint.classList.remove('hidden');
+                } else {
+                    alert('Erro ao criar motoboy');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Erro na comunicação com servidor');
+            })
+            .finally(() => {
+                btnCreate.disabled = false;
+                btnCreate.textContent = 'Criar';
+            });
+        });
+    </script>
 </body>
 </html>

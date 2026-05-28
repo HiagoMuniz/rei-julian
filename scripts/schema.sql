@@ -4,8 +4,8 @@
 -- 1. Table for Drivers (Entregadores)
 CREATE TABLE IF NOT EXISTS drivers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    status TEXT CHECK(status IN ('available', 'busy', 'offline')) DEFAULT 'offline',
+    name TEXT NOT NULL UNIQUE,
+    status TEXT CHECK(status IN ('available', 'busy', 'offline', 'delivered')) DEFAULT 'offline',
     last_lat REAL,
     last_lon REAL,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS drivers (
 -- 2. Table for Orders (Pedidos)
 CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tracking_token TEXT UNIQUE NOT NULL,
     client_name TEXT NOT NULL,
     delivery_address TEXT,
     status TEXT CHECK(status IN ('preparing', 'in_route', 'delivered', 'cancelled')) DEFAULT 'preparing',
@@ -27,15 +28,12 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE TABLE IF NOT EXISTS position_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     driver_id INTEGER NOT NULL,
+    order_id INTEGER,
     latitude REAL NOT NULL,
     longitude REAL NOT NULL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (driver_id) REFERENCES drivers(id)
+    FOREIGN KEY (driver_id) REFERENCES drivers(id),
+    FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 
--- Initial Seed Data for Testing
-INSERT INTO drivers (name, status) VALUES ('João Motoboy', 'available');
-INSERT INTO drivers (name, status) VALUES ('Maria Entrega', 'offline');
-
-INSERT INTO orders (client_name, delivery_address, status, driver_id) 
-VALUES ('Restaurante Central', 'Rua XV de Novembro, Pelotas', 'preparing', 1);
+-- (sem dados de seed — entregadores são criados dinamicamente pela simulação)

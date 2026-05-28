@@ -31,9 +31,9 @@ A ideia é validar uma infraestrutura capaz de suportar um sistema de delivery r
 
 ## 🗺️ Roadmap Experimental (Próximos Passos)
 A ideia é continuar "terceirizando" a lógica para a IA para implementar:
-1. **Persistência com SQLite:** Para não perder o rastro toda vez que o servidor reiniciar.
-2. **Ingestão via API:** Permitir que um celular real envie sua posição via POST.
-3. **Cálculo de ETA:** Usar APIs de roteamento para prever em quanto tempo o "Rei Julian" chega com a sua pizza.
+1. **Ingestão via API:** Permitir que um celular real envie sua posição via POST.
+2. **Cálculo de ETA:** Usar APIs de roteamento para prever em quanto tempo o "Rei Julian" chega com a sua pizza.
+3. **Autenticação Simples:** Adicionar login para o dashboard.
 
 ---
 **Desenvolvido por:** [Hiago Dona Muniz](https://github.com/hiagomuniz)

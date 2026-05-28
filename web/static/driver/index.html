@@ -3,14 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rei Julian - Área do Entregador</title>
+    <title>Rei Julian - App do Entregador</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { background: #f8fafc; }
+        body { 
+            background: var(--bg-dark); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .driver-container {
-            max-width: 400px;
-            margin: 40px auto;
-            padding: 20px;
+            width: 100%;
+            max-width: 450px;
+            padding: 25px;
         }
         .header {
             display: flex;
@@ -18,55 +24,271 @@
             align-items: center;
             margin-bottom: 30px;
         }
-        .status-card {
-            background: white;
+        .header h2 { margin: 0; font-size: 1.5rem; color: white; }
+        .header a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--panel-border);
             padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            backdrop-filter: blur(12px);
             margin-bottom: 20px;
-            border-top: 4px solid var(--success);
+            text-align: center;
         }
+        
         .status-indicator {
             display: inline-block;
-            width: 12px;
-            height: 12px;
-            background: var(--success);
+            width: 14px;
+            height: 14px;
+            background: var(--danger);
             border-radius: 50%;
-            margin-right: 8px;
+            margin-right: 10px;
+            box-shadow: 0 0 10px var(--danger);
+            transition: all 0.3s;
         }
-        .order-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        
+        .status-indicator.active {
+            background: var(--success);
+            box-shadow: 0 0 15px var(--success);
         }
-        .order-card h3 { margin-top: 0; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;}
-        .order-info p { margin: 8px 0; color: #475569; font-size: 0.95rem; }
-        .btn-finish { background: var(--accent); width: 100%; margin-top: 15px; padding: 12px;}
+
+        .coords {
+            font-family: ui-monospace, monospace;
+            color: var(--primary);
+            font-size: 0.9rem;
+            margin-top: 15px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .btn-track {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="driver-container">
         <div class="header">
-            <h2 style="margin: 0; color: var(--primary);">Entregador</h2>
-            <a href="/" style="color: #64748b; text-decoration: none; font-size: 0.9rem;">Sair</a>
+            <h2>App Entregador</h2>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="driver-selector" style="background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--panel-border); padding: 5px; border-radius: 4px;">
+                    <option value="">Carregando...</option>
+                </select>
+                <a href="/">Sair</a>
+            </div>
         </div>
 
-        <div class="status-card">
-            <h3 style="margin: 0 0 10px 0; color: var(--text);"><span class="status-indicator"></span> Transmitindo Localização</h3>
-            <p style="margin: 0; color: #64748b; font-size: 0.9rem;">Seu GPS está ativo e conectado com o restaurante.</p>
+        <div class="card">
+            <h3 style="margin: 0 0 10px 0; color: white;">
+                <span class="status-indicator" id="status-dot"></span>
+                <span id="status-text">Rastreamento Desligado</span>
+            </h3>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem;">
+                Envio em tempo real via GPS para o Restaurante.
+            </p>
+            <div class="coords" id="coords-display">
+                Aguardando GPS...
+            </div>
+            <button class="btn btn-track" id="btn-toggle">Iniciar Rastreamento</button>
         </div>
         
-        <div class="order-card">
-            <h3>Pedido Atual: #1042</h3>
-            <div class="order-info">
-                <p><strong>Cliente:</strong> Hiago Muniz</p>
-                <p><strong>Endereço:</strong> Praça Coronel Pedro Osório, 10</p>
-                <p><strong>Status:</strong> Em rota</p>
+        <div class="card" style="text-align: left;">
+            <h3 id="job-title" style="margin-top: 0; color: white; font-size: 1.1rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 10px;">
+                Nenhum Pedido Ativo
+            </h3>
+            <div id="job-details" style="display: none;">
+                <p style="margin: 8px 0; color: var(--text-muted); font-size: 0.95rem;"><strong>Destino Ativo:</strong> Siga para o alvo tracejado</p>
             </div>
-            <button class="btn btn-finish">Sinalizar Entrega Concluída</button>
+            
+            <div id="driver-map" style="height: 200px; width: 100%; border-radius: 8px; margin-top: 15px; border: 1px solid var(--panel-border);"></div>
+
+            <button id="btn-finish" class="btn btn-secondary" style="width: 100%; margin-top: 15px; display: none;">Sinalizar Entrega Concluída</button>
         </div>
     </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let watchId = null;
+        let isTracking = false;
+        let currentLat = -31.770687; // Começa no restaurante
+        let currentLon = -52.341350;
+        let driverID = '';
+
+        const driverSelector = document.getElementById('driver-selector');
+        const btnToggle = document.getElementById('btn-toggle');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const coordsDisplay = document.getElementById('coords-display');
+        const jobTitle = document.getElementById('job-title');
+        const jobDetails = document.getElementById('job-details');
+        const btnFinish = document.getElementById('btn-finish');
+
+        // Carregar motoristas dinamicamente
+        fetch('/api/drivers?t=' + Date.now())
+            .then(res => res.json())
+            .then(drivers => {
+                driverSelector.innerHTML = '';
+                if (!drivers || drivers.length === 0) {
+                    driverSelector.innerHTML = '<option value="">Nenhum Motoboy</option>';
+                    return;
+                }
+                drivers.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.name;
+                    opt.textContent = d.name;
+                    driverSelector.appendChild(opt);
+                });
+                driverID = driverSelector.value;
+            });
+
+        driverSelector.addEventListener('change', function(e) {
+            driverID = e.target.value;
+            console.log("Motorista alterado para: " + driverID);
+            if (isTracking) toggleTracking(); // Para rastreio ao trocar
+        });
+
+        // Inicializar Mapa do Entregador
+        const map = L.map('driver-map', { zoomControl: false }).setView([currentLat, currentLon], 16);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        let driverMarker = L.circleMarker([currentLat, currentLon], {
+            color: '#818cf8', fillColor: '#818cf8', fillOpacity: 1, radius: 8
+        }).addTo(map).bindTooltip("Você", { permanent: true, direction: 'bottom', className: 'marker-label' }).openTooltip();
+
+        let targetMarker = null;
+        let routeLine = L.polyline([], {
+            color: '#c084fc', weight: 3, opacity: 0.7, dashArray: '5, 10'
+        }).addTo(map);
+
+        // Conectar ao SSE para receber o status atual (target_lat/lon)
+        const source = new EventSource('/stream');
+        source.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.id === driverID) {
+                // Sincroniza o alvo com o servidor
+                const targetLat = data.target_lat;
+                const targetLon = data.target_lon;
+                
+                if (data.status === 'in_route' || data.status === 'returning') {
+                    jobTitle.textContent = data.status === 'in_route' ? "Pedido Ativo" : "Retornando à Base";
+                    jobDetails.style.display = 'block';
+                    btnFinish.style.display = data.status === 'in_route' ? 'block' : 'none';
+                    
+                    if (!targetMarker) {
+                        targetMarker = L.circleMarker([targetLat, targetLon], {
+                            color: '#10b981', fillColor: '#10b981', fillOpacity: 0.8, radius: 8
+                        }).addTo(map).bindTooltip("Destino", { permanent: true, direction: 'top', className: 'marker-label' }).openTooltip();
+                    } else {
+                        targetMarker.setLatLng([targetLat, targetLon]);
+                    }
+                    routeLine.setLatLngs([[currentLat, currentLon], [targetLat, targetLon]]);
+                    
+                    if (data.status === 'returning') {
+                        targetMarker.setTooltipContent("Base");
+                    }
+                } else {
+                    jobTitle.textContent = "Nenhum Pedido Ativo";
+                    jobDetails.style.display = 'none';
+                    btnFinish.style.display = 'none';
+                    if (targetMarker) { map.removeLayer(targetMarker); targetMarker = null; }
+                    routeLine.setLatLngs([]);
+                }
+            }
+        };
+
+        function toggleTracking() {
+            if (!driverID) {
+                alert("Selecione um motoboy primeiro.");
+                return;
+            }
+
+            isTracking = !isTracking;
+            if (isTracking) {
+                if (!navigator.geolocation) {
+                    alert("Seu navegador não suporta GPS.");
+                    isTracking = false;
+                    return;
+                }
+
+                btnToggle.textContent = "Parar Rastreamento";
+                btnToggle.style.background = "var(--danger)";
+                btnToggle.style.boxShadow = "0 4px 15px rgba(244, 63, 94, 0.4)";
+                statusDot.classList.add('active');
+                statusText.textContent = "Buscando Sinal GPS...";
+                driverSelector.disabled = true;
+
+                watchId = navigator.geolocation.watchPosition(
+                    position => {
+                        currentLat = position.coords.latitude;
+                        currentLon = position.coords.longitude;
+                        statusText.textContent = "Transmitindo...";
+                        sendLocation();
+                    },
+                    err => {
+                        console.error("Erro de GPS:", err);
+                        statusText.textContent = "Erro de GPS";
+                    },
+                    { enableHighAccuracy: true, maximumAge: 0 }
+                );
+            } else {
+                btnToggle.textContent = "Iniciar Rastreamento";
+                btnToggle.style.background = "";
+                btnToggle.style.boxShadow = "";
+                statusDot.classList.remove('active');
+                statusText.textContent = "Rastreamento Desligado";
+                driverSelector.disabled = false;
+                
+                if (watchId !== null) {
+                    navigator.geolocation.clearWatch(watchId);
+                    watchId = null;
+                }
+            }
+        }
+
+        function sendLocation(customStatus = '') {
+            coordsDisplay.innerHTML = `Lat: ${currentLat.toFixed(6)}<br>Lon: ${currentLon.toFixed(6)}`;
+            driverMarker.setLatLng([currentLat, currentLon]);
+            map.panTo([currentLat, currentLon]);
+            
+            if (targetMarker) {
+                routeLine.setLatLngs([[currentLat, currentLon], targetMarker.getLatLng()]);
+            }
+
+            const payload = {
+                id: driverID,
+                latitude: currentLat,
+                longitude: currentLon
+            };
+            if (customStatus) {
+                payload.status = customStatus;
+            }
+
+            fetch('/api/location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error("Falha ao enviar localização", err));
+        }
+
+        btnToggle.addEventListener('click', toggleTracking);
+
+        btnFinish.addEventListener('click', () => {
+            // Envia status 'delivered'
+            sendLocation('delivered');
+            btnFinish.textContent = "Sinalizado ✓";
+            btnFinish.style.background = "var(--success)";
+            setTimeout(() => {
+                btnFinish.textContent = "Sinalizar Entrega Concluída";
+                btnFinish.style.background = "";
+            }, 3000);
+        });
+    </script>
 </body>
 </html>

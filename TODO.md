@@ -2,21 +2,22 @@
 
 > **Note for Agent:** Before starting any task in a new session, ALWAYS ask the user for confirmation and direction.
 
-## 🟢 Completed Today (May 20, 2026)
-- [x] Refactored backend into modular packages (`internal/geo`, `internal/tracker`, etc.).
-- [x] Integrated SQLite persistence for tracking history.
-- [x] Automated database initialization from `schema.sql`.
-- [x] Simulation now registers drivers and saves every movement to the database.
+## 🟢 Completed (Até May 27, 2026)
+- [x] Refatoração do backend em pacotes modulares (`internal/geo`, `internal/tracker`, etc.).
+- [x] Integração da persistência em SQLite para o histórico de rastreamento.
+- [x] Automação da inicialização do banco a partir de `schema.sql`.
+- [x] Simulação com múltiplos entregadores com movimentação autônoma.
+- [x] **API Enhancement**: Rotas `GET /api/drivers` e `GET /api/history/{id}` criadas.
+- [x] **Driver Ingestion API**: Rota `POST /api/location` para atualizações manuais.
+- [x] **Frontend Polishing**: Sidebar com status dos motoristas e "History Mode" no mapa.
 
 ## 🟡 Next Session Start (Awaiting Approval)
-- [ ] **Task 1: API Enhancement**
-  - Create `GET /api/drivers` to list all registered drivers from DB.
-  - Create `GET /api/history/{id}` to fetch historical path for a specific driver.
-- [ ] **Task 2: Driver Ingestion API**
-  - Create `POST /api/location` to allow real manual updates (preparing for mobile app).
-- [ ] **Task 3: Frontend Polishing**
-  - Add a sidebar to the map showing the list of drivers and their status.
-  - Add a "History Mode" to draw the path taken by a driver on the map.
+- [ ] **Task 1: Autenticação Simples**
+  - Adicionar tela de login e proteção nas rotas de API.
+- [ ] **Task 2: Cálculo de ETA**
+  - Usar OSRM ou similar para prever o tempo de chegada.
+- [ ] **Task 3: Melhorias no Frontend**
+  - Refinar o visual da página e otimizar as atualizações via SSE.
 
 ---
-*Last update: May 20, 2026*
+*Last update: May 27, 2026*

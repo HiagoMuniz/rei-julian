@@ -45,19 +45,39 @@
             color: #334155;
             text-decoration: none;
         }
+        .status-tag {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <a href="/" class="back-btn">Voltar</a>
     <div class="client-overlay">
         <h3>Seu pedido está a caminho</h3>
-        <p>Entregador: <strong id="driver-name" style="text-transform: capitalize;">Julian</strong></p>
+        <p>Entregador: <strong id="driver-name" style="text-transform: capitalize;">Carregando...</strong></p>
+        <span id="order-status" class="status-tag" style="background: #e2e8f0; color: #475569;">Aguardando...</span>
     </div>
     
     <div id="map-client"></div>
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        let orderDetails = null;
+
+        if (!token) {
+            document.getElementById('driver-name').textContent = 'Token não informado';
+            document.getElementById('order-status').textContent = 'Erro';
+            document.getElementById('order-status').style.background = '#fecdd3';
+            document.getElementById('order-status').style.color = '#e11d48';
+        }
+
         const map = L.map('map-client', { zoomControl: false }).setView([-31.7706, -52.3413], 17);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         
@@ -68,20 +88,84 @@
         }).addTo(map);
 
         let marker = null;
-        const source = new EventSource("/stream");
+        let targetMarker = null;
 
-        source.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            if (data.id === 'julian') {
-                const pos = [data.latitude, data.longitude];
-                if (!marker) {
-                    marker = L.marker(pos).addTo(map).bindTooltip("Seu Pedido", { permanent: true, direction: 'top', className: 'marker-label' }).openTooltip();
-                } else {
-                    marker.setLatLng(pos);
+        function showDeliveredOverlay() {
+            const overlay = document.querySelector('.client-overlay');
+            overlay.innerHTML = `
+                <h3 style="color: #16a34a; font-size: 1.5rem; margin-bottom: 10px;">✅ Pedido Entregue!</h3>
+                <p style="font-size: 1rem; color: #475569;">O seu pedido já foi finalizado e entregue com sucesso.</p>
+                <p style="margin-top: 15px; font-weight: bold; color: #1e293b;">Bom apetite!</p>
+            `;
+            overlay.style.top = "50%";
+            overlay.style.transform = "translate(-50%, -50%)";
+            overlay.style.padding = "40px";
+            document.getElementById('map-client').style.opacity = '0.3';
+        }
+
+        if (token) {
+            let sseSource = null;
+
+            // Tenta obter detalhes do pedido primeiro
+            fetch(`/api/order/${token}`)
+                .then(res => res.json())
+                .then(data => {
+                    orderDetails = data;
+                    if (data.status === 'delivered') {
+                        showDeliveredOverlay();
+                        if (sseSource) sseSource.close();
+                    }
+                })
+                .catch(err => console.error("Erro ao buscar pedido:", err));
+
+            sseSource = new EventSource("/stream");
+
+            sseSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                
+                // Só atualiza se o token bater com o deste cliente!
+                if (data.token === token) {
+                    
+                    if (data.status === 'delivered') {
+                        showDeliveredOverlay();
+                        sseSource.close();
+                        return;
+                    }
+
+                    const driverNameEl = document.getElementById('driver-name');
+                    if (driverNameEl) driverNameEl.textContent = data.id;
+                    
+                    const statusTag = document.getElementById('order-status');
+                    if (statusTag) {
+                        if (data.status === 'in_route') {
+                            statusTag.textContent = 'Em Rota';
+                            statusTag.style.background = '#dbeafe';
+                            statusTag.style.color = '#2563eb';
+                        } else {
+                            statusTag.textContent = data.status;
+                        }
+                    }
+
+                    const pos = [data.latitude, data.longitude];
+                    const targetPos = [data.target_lat, data.target_lon];
+
+                    if (!marker) {
+                        marker = L.marker(pos).addTo(map).bindTooltip("Motoboy", { permanent: true, direction: 'top', className: 'marker-label' }).openTooltip();
+                    } else {
+                        marker.setLatLng(pos);
+                    }
+
+                    if (!targetMarker && data.status !== 'delivered' && data.target_lat !== 0) {
+                        targetMarker = L.circleMarker(targetPos, { color: '#f97316', fillColor: '#f97316', fillOpacity: 0.8, radius: 10 })
+                            .addTo(map)
+                            .bindTooltip("Seu Endereço", { permanent: true, direction: 'bottom', className: 'marker-label' }).openTooltip();
+                            
+                        const bounds = L.latLngBounds([pos, targetPos]);
+                        map.fitBounds(bounds, { padding: [50, 50] });
+                    }
                 }
-                map.panTo(pos);
-            }
-        };
+            };
+        }
     </script>
 </body>
 </html>

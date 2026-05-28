@@ -6,56 +6,89 @@
     <title>Rei Julian - Sistema Logístico</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
-        body { background: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh;}
+        body { 
+            background: var(--bg-dark); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh;
+            background-image: radial-gradient(circle at top right, rgba(129, 140, 248, 0.15), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(192, 132, 252, 0.15), transparent 40%);
+        }
         .portal-container {
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
             padding: 40px;
             text-align: center;
         }
-        .portal-container h1 { color: var(--primary); font-size: 2.5rem; margin-bottom: 10px;}
-        .portal-container > p { color: #64748b; margin-bottom: 40px; font-size: 1.1rem;}
+        .portal-container h1 { 
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 3.5rem; 
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+        .portal-container > p { 
+            color: var(--text-muted); 
+            margin-bottom: 50px; 
+            font-size: 1.2rem;
+        }
         .portal-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
         }
         .portal-card {
-            background: white;
-            padding: 40px 20px;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(var(--glass-blur));
+            padding: 45px 30px;
+            border-radius: 16px;
             text-decoration: none;
-            color: var(--text);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all 0.2s ease;
-            border: 1px solid #e2e8f0;
+            color: white;
+            border: 1px solid var(--panel-border);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
+        
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
         .portal-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border-color: var(--accent);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-color: rgba(129, 140, 248, 0.5);
+            background: rgba(255, 255, 255, 0.05);
         }
-        .portal-card h2 { margin: 0 0 10px 0; color: var(--primary); font-size: 1.4rem;}
-        .portal-card p { margin: 0; color: #64748b; font-size: 0.95rem; }
+        
+        .portal-card:hover::before {
+            opacity: 1;
+        }
+
+        .portal-card h2 { margin: 0 0 15px 0; color: white; font-size: 1.6rem;}
+        .portal-card p { margin: 0; color: var(--text-muted); font-size: 1rem; line-height: 1.5; }
     </style>
 </head>
 <body>
     <div class="portal-container">
         <h1>Rei Julian</h1>
-        <p>Sistema Integrado de Rastreamento Logístico</p>
+        <p>Ecossistema Avançado de Rastreamento Logístico</p>
         
-        <div class="portal-grid">
-            <a href="/admin" class="portal-card">
-                <h2>Restaurante</h2>
-                <p>Painel de controle e monitoramento da frota</p>
+        <div class="portal-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 350px)); justify-content: center;">
+            <a href="/admin/" class="portal-card">
+                <h2>🏢 Restaurante</h2>
+                <p>Painel de controle central para monitoramento da frota em tempo real.</p>
             </a>
-            <a href="/driver" class="portal-card">
-                <h2>Entregador</h2>
-                <p>Interface móvel de atualização de rota</p>
-            </a>
-            <a href="/client" class="portal-card">
-                <h2>Cliente</h2>
-                <p>Acompanhamento de pedido em tempo real</p>
+            <a href="/driver/" class="portal-card">
+                <h2>🛵 Entregador</h2>
+                <p>Interface móvel para atualização de rota e status de entrega.</p>
             </a>
         </div>
     </div>

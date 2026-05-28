@@ -23,4 +23,8 @@ relatorio_multi_rastreio.tex
 *.toc
 *.pdf
 reijulian.db
-
+reijulian.db-shm
+reijulian.db-wal
+dummy.exe
+transcript_line.txt
+transcript_line_utf8.txt

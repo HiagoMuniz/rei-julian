@@ -16,7 +16,7 @@ Atualmente, o sistema valida a arquitetura de comunicação necessária para ger
 
 ## 3. Limites e Desafios de Implementação
 Para a transição do protótipo para o produto final, os seguintes desafios técnicos foram mapeados:
-*   **Persistência de Dados:** Transição da memória volátil para um banco de dados relacional para armazenamento de históricos de rotas e auditoria de entregas.
+*   **Persistência de Dados (Resolvido):** Transição da memória volátil para um banco de dados relacional (SQLite) para armazenamento de históricos de rotas e auditoria de entregas.
 *   **Integração de Mapas Reais:** Substituição da movimentação aleatória por APIs de roteamento (como OSRM ou Google Routes) que respeitem a malha viária urbana.
 *   **Segurança e Privacidade:** Implementação de camadas de autenticação e criptografia para garantir que os dados de localização sejam acessíveis apenas às partes autorizadas.
 

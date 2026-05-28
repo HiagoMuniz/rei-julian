@@ -7,12 +7,15 @@ import (
 
 type Position struct {
 	ID        string    `json:"id"`
+	Token     string    `json:"token,omitempty"`
 	Latitude  float64   `json:"latitude"`
 	Longitude float64   `json:"longitude"`
 	TargetLat float64   `json:"target_lat"`
 	TargetLon float64   `json:"target_lon"`
+	Status    string    `json:"status,omitempty"`
 	Timestamp time.Time `json:"timestamp"`
 	Step      int       `json:"step"`
+
 }
 
 type Tracker struct {
